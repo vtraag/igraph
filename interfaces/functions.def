@@ -50,7 +50,7 @@ igraph_is_directed:
         IGNORE: RR, RC, RNamespace
 
 igraph_degree:
-        PARAMS: GRAPH graph, OUT VECTOR res, VERTEXSET vids=ALL, NEIMODE mode=ALL, \ 
+        PARAMS: GRAPH graph, OUT VECTOR res, VERTEXSET vids=ALL, NEIMODE mode=ALL, \
                 BOOLEAN loops
         NAME-R: degree
         IGNORE: RR, RC, RNamespace
@@ -304,7 +304,7 @@ igraph_static_power_law_game:
         GATTR-PARAM-R: exponent_out, exponent_in, loops, multiple, \
                        finite_size_correction
         FLAGS: PROGRESS
-                
+
 igraph_k_regular_game:
         PARAMS: OUT GRAPH graph, INTEGER no_of_nodes, INTEGER k, \
                 BOOLEAN directed=False, BOOLEAN multiple=False
@@ -431,7 +431,7 @@ igraph_shortest_paths:
         IGNORE: RR, RC, RNamespace
 
 igraph_get_shortest_paths:
-        PARAMS: GRAPH graph, OUT VERTEXSETLIST_OR_0 vertices, 
+        PARAMS: GRAPH graph, OUT VERTEXSETLIST_OR_0 vertices,
                 OUT EDGESETLIST_OR_0 edges, VERTEX from, VERTEXSET to=ALL, \
                 NEIMODE mode=OUT, OUT VECTOR_LONG_OR_0 predecessors=0, \
                 OUT VECTOR_LONG_OR_0 inbound_edges=0
@@ -485,7 +485,7 @@ igraph_get_all_simple_paths:
         PP-R: get.all.simple.paths.pp
         IGNORE: RR
 
-igraph_subcomponent: 
+igraph_subcomponent:
         PARAMS: GRAPH graph, OUT VERTEXSET res, VERTEX vid, NEIMODE mode=ALL
         IGNORE: RR, RC, RNamespace
 
@@ -858,7 +858,7 @@ igraph_random_walk:
         IGNORE: RR
 
 #######################################
-# Degree sequences     
+# Degree sequences
 #######################################
 
 igraph_is_degree_sequence:
@@ -1368,6 +1368,14 @@ igraph_community_optimal_modularity:
         NAME-R: cluster_optimal
         IGNORE: RR
 
+igraph_community_leiden:
+        PARAMS: GRAPH graph, \
+                EDGEWEIGHTS edge_weights=NULL, VERTEXWEIGHTS node_weights=NULL, \
+                REAL resolution_parameter=1, REAL beta=0.01, \
+                BOOLEAN start=False, OUT VECTOR membership, OUT INTEGER nb_clusters, OUT REAL quality
+        NAME-R: cluster_community_leiden
+        IGNORE: RR
+
 igraph_split_join_distance:
         PARAMS: VECTOR comm1, VECTOR comm2, OUT INTEGERPTR distance12, \
 		        OUT INTEGERPTR distance21
@@ -1639,7 +1647,7 @@ igraph_list_triangles:
 igraph_disjoint_union:
         PARAMS: OUT GRAPH res, GRAPH left, GRAPH right, \
                 OUT EDGESET edge_map_left, OUT EDGESET edge_map_right
-        DEPS: edge_map_left ON left, edge_map_right ON right      
+        DEPS: edge_map_left ON left, edge_map_right ON right
         IGNORE: RR, RC, RNamespace
 
 igraph_disjoint_union_many:
@@ -1750,7 +1758,7 @@ igraph_cohesion:
 # Listing s-t cuts, separators
 #######################################
 
-igraph_dominator_tree: 
+igraph_dominator_tree:
         PARAMS: GRAPH graph, VERTEX root, OUT VERTEXSET dom, \
                 OUT GRAPH_OR_0 domtree, OUT VERTEXSET leftout, \
                 INOUTMODE mode=OUT
