@@ -73,6 +73,14 @@ int igraph_marked_queue_push(igraph_marked_queue_t *q, long int elem) {
     return 0;
 }
 
+int igraph_marked_queue_pop(igraph_marked_queue_t *q)
+{
+    igraph_integer_t elem = igraph_dqueue_pop(&q->Q);
+    VECTOR(q->set)[elem] = 0;
+    q->size -= 1;
+    return elem;
+}
+
 int igraph_marked_queue_start_batch(igraph_marked_queue_t *q) {
     IGRAPH_CHECK(igraph_dqueue_push(&q->Q, BATCH_MARKER));
     return 0;

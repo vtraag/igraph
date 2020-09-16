@@ -60,6 +60,7 @@ igraph_bool_t igraph_marked_queue_iselement(const igraph_marked_queue_t *q,
         long int elem);
 
 int igraph_marked_queue_push(igraph_marked_queue_t *q, long int elem);
+int igraph_marked_queue_pop(igraph_marked_queue_t *q);
 
 int igraph_marked_queue_start_batch(igraph_marked_queue_t *q);
 void igraph_marked_queue_pop_back_batch(igraph_marked_queue_t *q);

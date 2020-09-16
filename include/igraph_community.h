@@ -212,7 +212,8 @@ DECLDIR int igraph_community_label_propagation(const igraph_t *graph,
         const igraph_vector_t *weights,
         const igraph_vector_t *initial,
         igraph_vector_bool_t *fixed,
-        igraph_real_t *modularity);
+        igraph_real_t *modularity,
+        igraph_bool_t fast);
 
 DECLDIR int igraph_community_multilevel(const igraph_t *graph,
                                         const igraph_vector_t *weights,
