@@ -40,7 +40,6 @@
 #include "igraph_conversion.h"
 #include "igraph_centrality.h"
 #include "igraph_structural.h"
-#include "igraph_marked_queue.h"
 #include "config.h"
 
 #include <string.h>
@@ -2507,7 +2506,8 @@ int igraph_i_community_fast_label_propagation(const igraph_t *graph,
     igraph_inclist_t il;
 
     igraph_vector_t label_counters, dominant_labels, nonzero_labels, node_order;
-    igraph_marked_queue_t queue;
+    igraph_dqueue_t queue;
+    igraph_vector_bool_t in_queue;
 
     IGRAPH_CHECK(igraph_inclist_init(graph, &il, IGRAPH_IN));
     IGRAPH_FINALLY(igraph_inclist_destroy, &il);
@@ -2521,8 +2521,9 @@ int igraph_i_community_fast_label_propagation(const igraph_t *graph,
     RNG_BEGIN();
 
     /* Initialize node ordering vector with only the not fixed nodes */
-    IGRAPH_CHECK(igraph_marked_queue_init(&queue, no_of_nodes));
-    IGRAPH_FINALLY(igraph_marked_queue_destroy, &queue);
+    IGRAPH_CHECK(igraph_dqueue_init(&queue, no_of_nodes));
+    IGRAPH_FINALLY(igraph_dqueue_destroy, &queue);
+    IGRAPH_VECTOR_BOOL_INIT_FINALLY(&in_queue, no_of_nodes);
 
     /* Use random node order */
     IGRAPH_VECTOR_INIT_FINALLY(&node_order, 0);
@@ -2533,17 +2534,21 @@ int igraph_i_community_fast_label_propagation(const igraph_t *graph,
     IGRAPH_CHECK(igraph_vector_shuffle(&node_order));
     no_of_fixed_nodes = igraph_vector_size(&node_order);
     for (i = 0; i < no_of_fixed_nodes; i++)
-        IGRAPH_CHECK(igraph_marked_queue_push(&queue, VECTOR(node_order)[i]));
+    {
+        IGRAPH_CHECK(igraph_dqueue_push(&queue, VECTOR(node_order)[i]));
+        VECTOR(in_queue)[(igraph_integer_t)VECTOR(node_order)[i]] = 1;
+    }
     igraph_vector_destroy(&node_order);
     IGRAPH_FINALLY_CLEAN(1);
 
-    while (!igraph_marked_queue_empty(&queue)) {
+    while (!igraph_dqueue_empty(&queue)) {
         long int v1, num_neis;
         igraph_real_t max_count;
         igraph_vector_int_t *neis;
         igraph_bool_t was_zero;
 
-        v1 = igraph_marked_queue_pop(&queue);
+        v1 = igraph_dqueue_pop(&queue);
+        VECTOR(in_queue)[v1] = 0;
 
         /* Count the weights corresponding to different labels */
         igraph_vector_clear(&dominant_labels);
@@ -2585,10 +2590,14 @@ int igraph_i_community_fast_label_propagation(const igraph_t *graph,
                 /* We still need to consider its neighbors not in the new community */
                 for (i = 0; i < num_neis; i++) {
                     igraph_integer_t v2 = IGRAPH_OTHER(graph, VECTOR(*neis)[i], v1);
-                    igraph_integer_t neigh_label = (long int) VECTOR(*membership)[v2]; /* neighbor community */
-                    if (neigh_label != current_label && /* not in new community */
-                        (fixed == NULL || !VECTOR(*fixed)[v2]) ) /* not fixed */ {
-                            igraph_marked_queue_push(&queue, v2);
+                    if (!VECTOR(in_queue)[v2])
+                    {
+                        igraph_integer_t neigh_label = (long int) VECTOR(*membership)[v2]; /* neighbor community */
+                        if (neigh_label != current_label && /* not in new community */
+                            (fixed == NULL || !VECTOR(*fixed)[v2]) ) /* not fixed */ {
+                                igraph_dqueue_push(&queue, v2);
+                                VECTOR(in_queue)[v2] = 1;
+                        }
                     }
                 }
             }
@@ -2606,11 +2615,12 @@ int igraph_i_community_fast_label_propagation(const igraph_t *graph,
     igraph_inclist_destroy(&il);
     IGRAPH_FINALLY_CLEAN(1);
 
+    igraph_vector_bool_destroy(&in_queue);
+    igraph_dqueue_destroy(&queue);
     igraph_vector_destroy(&label_counters);
     igraph_vector_destroy(&dominant_labels);
     igraph_vector_destroy(&nonzero_labels);
-    igraph_marked_queue_destroy(&queue);
-    IGRAPH_FINALLY_CLEAN(4);
+    IGRAPH_FINALLY_CLEAN(5);
 
     return 0;
 }
